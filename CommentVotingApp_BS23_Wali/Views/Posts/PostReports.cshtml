@@ -1,0 +1,165 @@
+﻿@model CommentVotingApp_BS23_Wali.Models.PostSearchModel
+@using PagedList.Mvc;
+@{
+    ViewBag.Title = "PostReports";
+}
+
+
+@{
+    ViewBag.Title = "Post Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .form-control {
+        color: #ff6a00;
+        background-color: #dedede
+    }
+    /**/
+    .ntbl {
+        border: 1px solid;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+        .ntbl tr .tdc {
+            padding: 0px 20px;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ntbl tr .tdcbtn {
+            padding: 0px 20px;
+            white-space: nowrap;
+        }
+
+
+        .ntbl tr:nth-child(odd) {
+            background-color: #dedede;
+        }
+
+    .proforma-div {
+        overflow-y: scroll;
+        height: 200px;
+    }
+</style>
+
+
+
+
+@*SEarCH Post*@
+@using (Html.BeginForm("PostReports", "Posts", FormMethod.Get))
+{
+    @*@Html.ValidationSummary(false)*@
+
+    <div class="row " style="margin-top:25px;">
+        <div class="col-sm-12 ">
+            <div class="col-sm-9" style="font-size:24px;"><b>Note: </b>Click on search button to show all data <i class="glyphicon glyphicon-hand-right"></i></div>
+            <div class="col-sm-3 pull-right">
+                <div class="form-group">
+                    <div class="input-group">
+                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control form-control" } })
+                        <span class="input-group-addon">
+                            <input name="SearchButton" type="submit" value="Search" class="" />
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+}
+@*SEarCH Post*@
+
+<!-- START: LISTING AREA-->
+@if (Model.SearchResults != null && Model.SearchResults.Count > 0)
+{
+    <div class="col-md-12">
+        <!--   Basic Table  -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <span class="badge badge-success">@Model.SearchResults.Count()</span> Data matched by filters
+                <span class="pull-right">
+                    <a href=""><i class="fa fa-download"></i></a>
+                    <a href=""><i class="fa fa-print"></i></a>
+                </span>
+
+            </div>
+            <div class="panel-body">
+
+                <div class="table-responsive">
+                    <table id="" class="table table-sm table-bordered ntbl">
+
+                        <tbody>
+                            @foreach (var item in Model.SearchResults)
+                            {
+                                <tr style="color:#118fcd;font-weight:900">
+                                    <td class="tdc" data-toggle="tooltip" data-placement="top" title="@item.PostTitle">
+                                        @Html.DisplayFor(modelItem => item.PostTitle)
+                                    </td>
+                                    <td class="tdc" data-toggle="tooltip" data-placement="top" title="@item.CreatedBy">
+                                        @Html.DisplayFor(modelItem => item.CreatedBy)
+                                    </td>
+                                    <td class="tdc" data-toggle="tooltip" data-placement="top" title="@item.CreatedOn">
+                                        @item.CreatedOn.ToString("dd/MM/yyy")
+                                    </td>
+                                    <td class="tdc text-center" data-toggle="tooltip" data-placement="top">
+                                        Comments (@item.Comments.Count())
+                                    </td>
+                                </tr>
+                                foreach (var comm in item.Comments)
+                                {
+                                    <tr style="color:#000000">
+                                        <td style="text-indent:20px;" class="tdc" data-toggle="tooltip" data-placement="top" title="@comm.Comment">
+                                            @Html.DisplayFor(modelItem => comm.Comment)
+                                        <td class="tdc" data-toggle="tooltip" data-placement="top" title="@comm.CreatedBy">
+                                            @Html.DisplayFor(modelItem => comm.CreatedBy)
+                                        </td>
+                                        <td class="tdc" data-toggle="tooltip" data-placement="top" title="@comm.CreatedOn">
+                                            @comm.CreatedOn.ToString("dd-MM-yyy")
+                                        </td>
+                                        <td class="tdc text-center" data-toggle="tooltip" data-placement="top">
+                                            <span>
+                                                <i class="glyphicon glyphicon-circle-arrow-up text-success"></i> @comm.Votes.Count(c => c.isVote == true)
+                                            </span>
+                                            <span>
+                                                <i class="glyphicon glyphicon-circle-arrow-down text-danger"></i> @comm.Votes.Count(c => c.isVote == false)
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+                <hr />
+
+                <div style="text-align:center">
+
+                    @Html.PagedListPager(Model.SearchResults, page => Url.Action("PostReports", new RouteValueDictionary()
+                    {
+                        { "page", page },
+                        { "Title", Model.Title },
+                        { "Date", Model.CreatedOn }
+                    }),
+                    PagedListRenderOptions.PageNumbersOnly)
+                </div>
+            </div>
+        </div>
+        <!-- End  Basic Table  -->
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <i style="font-size:100px;margin-top:30px;" class="fa fa-search-minus text-danger"></i>
+        <div class="alert alert-warning">
+            Data not matched by filters.
+        </div>
+    </div>
+}
+<!-- END: LISTING AREA -->
